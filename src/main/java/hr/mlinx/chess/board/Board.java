@@ -2,6 +2,8 @@ package hr.mlinx.chess.board;
 
 import hr.mlinx.chess.util.FENParser;
 
+import java.util.Arrays;
+
 public class Board {
 
     private final int[][] chessBoard;
@@ -9,6 +11,10 @@ public class Board {
     public Board() {
         chessBoard = new int[8][8];
         initializeClassicPosition();
+    }
+
+    public Board(int[][] chessBoard) {
+        this.chessBoard = chessBoard;
     }
 
     public int getPieceAt(int row, int col) {
@@ -23,8 +29,21 @@ public class Board {
         chessBoard[row][col] = piece;
     }
 
+    public void doMove(int fromRow, int fromCol, int toRow, int toCol, int fromPiece) {
+        setPieceAt(toRow, toCol, fromPiece);
+        setPieceAt(fromRow, fromCol, Piece.NONE);
+    }
+
     public int[][] getChessBoard() {
         return chessBoard;
+    }
+
+    public Board createCopy() {
+        int[][] chessBoardCopy = new int[8][8];
+        for (int i = 0; i < chessBoard.length; i++) {
+            chessBoardCopy[i] = Arrays.copyOf(chessBoard[i], chessBoard[i].length);
+        }
+        return new Board(chessBoardCopy);
     }
 
     private void initializeClassicPosition(){
