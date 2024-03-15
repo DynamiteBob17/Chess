@@ -4,13 +4,16 @@ import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Piece;
 
 import java.awt.*;
+import java.util.HashSet;
 import java.util.Set;
 
 public class PawnValidator {
 
     private PawnValidator() {}
 
-    public static void addValidMoves(int fromRow, int fromCol, Board board, Set<Point> validMoves) {
+    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Point> validMoves = new HashSet<>();
+
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 
         int rowIncrement = (pieceColor == Piece.WHITE) ? -1 : 1;
@@ -37,6 +40,20 @@ public class PawnValidator {
                     validMoves.add(new Point(targetCol, targetRow));
                 }
             }
+        }
+
+        return validMoves;
+    }
+
+    public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol, Board board) {
+        int color = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
+        boolean isWhite = color == Piece.WHITE;
+
+        // Check for normal pawn attack (diagonals)
+        if (isWhite) {
+            return (toRow == fromRow - 1 && Math.abs(toCol - fromCol) == 1);
+        } else {
+            return (toRow == fromRow + 1 && Math.abs(toCol - fromCol) == 1);
         }
     }
 

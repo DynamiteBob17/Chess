@@ -4,6 +4,7 @@ import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Piece;
 
 import java.awt.*;
+import java.util.HashSet;
 import java.util.Set;
 
 public class KingValidator {
@@ -11,7 +12,9 @@ public class KingValidator {
     private KingValidator() {
     }
 
-    public static void addValidMoves(int fromRow, int fromCol, Board board, Set<Point> validMoves) {
+    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Point> validMoves = new HashSet<>();
+
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 
         // King can move 1 square in any direction
@@ -27,6 +30,15 @@ public class KingValidator {
                 }
             }
         }
+
+        return validMoves;
+    }
+
+    public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol) {
+        int rowDiff = Math.abs(toRow - fromRow);
+        int colDiff = Math.abs(toCol - fromCol);
+
+        return (rowDiff <= 1 && colDiff <= 1);
     }
 
 }

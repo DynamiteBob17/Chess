@@ -12,10 +12,12 @@ public class MoveValidation {
 
     private final Board board;
     private final ValidMovesCache validMovesCache;
+    private final ValidMovesFilter validMovesFilter;
 
     public MoveValidation(Board board) {
         this.board = board;
         validMovesCache = new ValidMovesCache(board);
+        validMovesFilter = new ValidMovesFilter(board);
     }
 
     public Set<Point> getValidMoves(int fromRow, int fromCol) {
@@ -30,26 +32,13 @@ public class MoveValidation {
         );
 
         Set<Point> validMoves = validMovesOptional.orElse(null);
-
         if (validMoves != null) {
             return validMoves;
         }
 
         validMoves = validMovesCache.getValidMoves();
-
-        switch (Piece.getTypeFromPiece(board.getPieceAt(fromRow, fromCol))) {
-            case Piece.PAWN -> PawnValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            case Piece.KNIGHT -> KnightValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            case Piece.BISHOP -> BishopValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            case Piece.ROOK -> RookValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            case Piece.QUEEN -> QueenValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            case Piece.KING -> KingValidator.addValidMoves(fromRow, fromCol, board, validMoves);
-            default -> {
-                return validMoves;
-            }
-        }
-
-        ValidMovesFilter.filter(validMoves, fromRow, fromCol);
+        validMoves.addAll(calculateValidMoves(fromRow, fromCol, board));
+        validMovesFilter.filter(validMoves, fromRow, fromCol);
 
         validMovesCache.setNewValidMoves(
                 fromRow,
@@ -60,7 +49,19 @@ public class MoveValidation {
         return validMoves;
     }
 
-    public boolean isValidMove(int fromRow, int fromCol, int toRow, int toCol) {
+    public static Set<Point> calculateValidMoves(int fromRow, int fromCol, Board board) {
+        return switch (Piece.getTypeFromPiece(board.getPieceAt(fromRow, fromCol))) {
+            case Piece.PAWN -> PawnValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.KNIGHT -> KnightValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.BISHOP -> BishopValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.ROOK -> RookValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.QUEEN -> QueenValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.KING -> KingValidator.getValidMoves(fromRow, fromCol, board);
+            default -> Set.of();
+        };
+    }
+
+    private boolean isValidMove(int fromRow, int fromCol, int toRow, int toCol) {
         return getValidMoves(fromRow, fromCol).contains(new Point(toCol, toRow));
     }
 
@@ -79,19 +80,6 @@ public class MoveValidation {
 
     public boolean isInvalidPlacement(int row, int col) {
         return row < 0 || row >= 8 || col < 0 || col >= 8;
-    }
-
-    public static void checkDirection(int fromRow, int fromCol, int rowDir, int colDir, Board board, Set<Point> validMoves) {
-        for (int i = fromRow + rowDir, j = fromCol + colDir; i >= 0 && i < 8 && j >= 0 && j < 8; i += rowDir, j += colDir) {
-            if (board.getPieceAt(i, j) == Piece.NONE) {
-                validMoves.add(new Point(j, i));
-            } else {
-                if (Piece.getColorFromPiece(board.getPieceAt(i, j)) != Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol))) {
-                    validMoves.add(new Point(j, i));
-                }
-                break;
-            }
-        }
     }
 
 }
