@@ -67,9 +67,7 @@ public class ChessMouseListener extends MouseAdapter {
             int fromPiece = board.getPieceAt(selectedPiece.y, selectedPiece.x);
             int toPiece = board.getPieceAt(row, col);
 
-            board.setPieceAt(row, col, fromPiece);
-            board.setPieceAt(selectedPiece.y, selectedPiece.x, Piece.NONE);
-
+            board.doMove(selectedPiece.y, selectedPiece.x, row, col, fromPiece);
             soundPlayer.playMoveSound(toPiece);
 
             prevMove = new Point(selectedPiece.x, selectedPiece.y);
