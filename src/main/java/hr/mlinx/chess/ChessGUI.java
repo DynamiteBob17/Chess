@@ -36,6 +36,8 @@ public class ChessGUI extends JPanel {
                 moveValidation
         );
 
+        setBackground(Color.DARK_GRAY);
+
         pieceImagesRegular = new HashMap<>();
         pieceImagesSelected = new HashMap<>();
         String[] pieceTypes = {"p", "n", "b", "r", "q", "k"};
@@ -71,9 +73,7 @@ public class ChessGUI extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(SQUARE_SIZE * 8 + PADDING * 2, SQUARE_SIZE * 8 + SQUARE_SIZE * 2);
         frame.setResizable(false);
-
         frame.add(this);
-
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
