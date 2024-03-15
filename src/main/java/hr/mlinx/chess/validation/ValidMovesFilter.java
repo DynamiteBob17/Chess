@@ -63,16 +63,17 @@ public class ValidMovesFilter {
         throw new IllegalStateException("King not found on the board.");
     }
 
-
     private boolean isKingUnderAttack(int kingRow, int kingCol, int kingColor, Board board) {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                if (Piece.getColorFromPiece(board.getPieceAt(row, col)) != kingColor &&
+                if (Piece.getTypeFromPiece(board.getPieceAt(row, col)) != Piece.NONE &&
+                        Piece.getColorFromPiece(board.getPieceAt(row, col)) != kingColor &&
                         isPieceAttacked(row, col, kingRow, kingCol, board)) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -85,7 +86,7 @@ public class ValidMovesFilter {
             case Piece.ROOK -> RookValidator.isAttack(fromRow, fromCol, toRow, toCol, hypotheticalBoard);
             case Piece.QUEEN -> QueenValidator.isAttack(fromRow, fromCol, toRow, toCol, hypotheticalBoard);
             case Piece.KING -> KingValidator.isAttack(fromRow, fromCol, toRow, toCol);
-            default -> false; // Invalid piece type
+            default -> false;
         };
     }
 
