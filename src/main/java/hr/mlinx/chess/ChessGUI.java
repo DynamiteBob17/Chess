@@ -24,7 +24,8 @@ public class ChessGUI extends JPanel {
     private final transient Board board;
     private final transient MoveValidation moveValidation;
     private final transient ChessMouseListener chessMouseListener;
-    private final transient Map<Integer, Image> pieceImages;
+    private final transient Map<Integer, Image> pieceImagesRegular;
+    private final transient Map<Integer, Image> pieceImagesSelected;
 
     public ChessGUI() {
         board = new Board();
@@ -35,15 +36,30 @@ public class ChessGUI extends JPanel {
                 moveValidation
         );
 
-        pieceImages = new HashMap<>();
+        pieceImagesRegular = new HashMap<>();
+        pieceImagesSelected = new HashMap<>();
         String[] pieceTypes = {"p", "n", "b", "r", "q", "k"};
         String[] pieceColors = {"l", "d"};
         ImageLoader imageLoader = new ImageLoader();
+
         for (String pieceColor : pieceColors) {
             for (String pieceType : pieceTypes) {
-                pieceImages.put(
+                Image originalImage = imageLoader.loadImage(String.format("Chess_%s%st45.png", pieceType, pieceColor));
+                Image scaledImage = originalImage.getScaledInstance(SQUARE_SIZE - 16, SQUARE_SIZE - 16, Image.SCALE_SMOOTH);
+                pieceImagesRegular.put(
                         Piece.getPieceTypeByFile(pieceType) | Piece.getPieceColorByFile(pieceColor),
-                        imageLoader.loadImage(String.format("Chess_%s%st45.png", pieceType, pieceColor))
+                        scaledImage
+                );
+            }
+        }
+
+        for (String pieceColor : pieceColors) {
+            for (String pieceType : pieceTypes) {
+                Image originalImage = imageLoader.loadImage(String.format("Chess_%s%st45.png", pieceType, pieceColor));
+                Image scaledImage = originalImage.getScaledInstance(SQUARE_SIZE, SQUARE_SIZE, Image.SCALE_SMOOTH);
+                pieceImagesSelected.put(
+                        Piece.getPieceTypeByFile(pieceType) | Piece.getPieceColorByFile(pieceColor),
+                        scaledImage
                 );
             }
         }
@@ -111,7 +127,7 @@ public class ChessGUI extends JPanel {
 
         if (piece != Piece.NONE &&
                 (chessMouseListener.getSelectedPiece() == null || !chessMouseListener.getSelectedPiece().equals(currentSquare))) {
-            Image pieceImage = pieceImages.get(piece);
+            Image pieceImage = pieceImagesRegular.get(piece);
             int x = col * SQUARE_SIZE + PADDING + 8;
             int y = row * SQUARE_SIZE + SQUARE_SIZE + 8;
             g2d.drawImage(pieceImage, x, y, SQUARE_SIZE - 16, SQUARE_SIZE - 16, this);
@@ -121,7 +137,7 @@ public class ChessGUI extends JPanel {
     private void drawSelectedPiece(Graphics2D g2d) {
         if (chessMouseListener.getSelectedPiece() != null &&
                 !moveValidation.isInvalidPlacement(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x)) {
-            Image selectedPieceImage = pieceImages.get(board.getPieceAt(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x));
+            Image selectedPieceImage = pieceImagesSelected.get(board.getPieceAt(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x));
             int x = chessMouseListener.getInitialDrag().x - SQUARE_SIZE / 2;
             int y = chessMouseListener.getInitialDrag().y - SQUARE_SIZE / 2;
             g2d.drawImage(selectedPieceImage, x, y, SQUARE_SIZE, SQUARE_SIZE, this);
