@@ -31,14 +31,17 @@ public class MoveValidation {
                 board.getPieceAt(fromRow, fromCol)
         );
 
-        Set<Point> validMoves = validMovesOptional.orElse(null);
-        if (validMoves != null) {
-            return validMoves;
+        Set<Point> cachedValidMoves = validMovesOptional.orElse(null);
+        if (cachedValidMoves != null) {
+            return cachedValidMoves;
         }
 
-        validMoves = validMovesCache.getValidMoves();
+        Set<Point> validMoves = validMovesCache.getValidMoves();
         validMoves.addAll(calculateValidMoves(fromRow, fromCol, board));
-        validMovesFilter.filter(validMoves, fromRow, fromCol);
+
+        if (!validMoves.isEmpty()) {
+            validMovesFilter.filter(validMoves, fromRow, fromCol);
+        }
 
         validMovesCache.setNewValidMoves(
                 fromRow,
