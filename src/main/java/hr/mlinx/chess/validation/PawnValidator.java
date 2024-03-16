@@ -1,9 +1,7 @@
 package hr.mlinx.chess.validation;
 
-import hr.mlinx.chess.board.Board;
-import hr.mlinx.chess.board.Piece;
+import hr.mlinx.chess.board.*;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,25 +9,35 @@ public class PawnValidator {
 
     private PawnValidator() {}
 
-    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Point> validMoves = new HashSet<>();
+    public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Move> validMoves = new HashSet<>();
 
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 
         int rowIncrement = (pieceColor == Piece.WHITE) ? -1 : 1;
 
-        // 2 moves up from starting position
+        addTwoMovesUpIfValid(fromRow, fromCol, board, pieceColor, rowIncrement, validMoves);
+        addOneMoveUpIfValid(fromRow, fromCol, board, rowIncrement, validMoves);
+        addDiagonalMovesIfValid(fromRow, fromCol, board, pieceColor, rowIncrement, validMoves);
+        addEnPassantMoveIfValid(fromRow, fromCol, board, rowIncrement, validMoves);
+
+        return validMoves;
+    }
+
+    private static void addTwoMovesUpIfValid(int fromRow, int fromCol, Board board, int pieceColor, int rowIncrement, Set<Move> validMoves) {
         if ((fromRow == 6 && pieceColor == Piece.WHITE) || (fromRow == 1 && pieceColor == Piece.BLACK)
                 && (board.getPieceAt(fromRow + 2 * rowIncrement, fromCol) == Piece.NONE)) {
-                validMoves.add(new Point(fromCol, fromRow + 2 * rowIncrement));
+            validMoves.add(new Move(fromRow, fromCol, fromRow + rowIncrement * 2, fromCol));
         }
+    }
 
-        // 1 move up
+    private static void addOneMoveUpIfValid(int fromRow, int fromCol, Board board, int rowIncrement, Set<Move> validMoves) {
         if (board.getPieceAt(fromRow + rowIncrement, fromCol) == Piece.NONE) {
-            validMoves.add(new Point(fromCol, fromRow + rowIncrement));
+            validMoves.add(new Move(fromRow, fromCol, fromRow + rowIncrement, fromCol));
         }
+    }
 
-        // Diagonal moves
+    private static void addDiagonalMovesIfValid(int fromRow, int fromCol, Board board, int pieceColor, int rowIncrement, Set<Move> validMoves) {
         int[] colOffsets = {-1, 1};
         for (int colOffset : colOffsets) {
             int targetRow = fromRow + rowIncrement;
@@ -37,13 +45,28 @@ public class PawnValidator {
             if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
                 int targetPiece = board.getPieceAt(targetRow, targetCol);
                 if (Piece.getColorFromPiece(targetPiece) != pieceColor && targetPiece != Piece.NONE) {
-                    validMoves.add(new Point(targetCol, targetRow));
+                    validMoves.add(new Move(fromRow, fromCol, targetRow, targetCol));
                 }
             }
         }
-
-        return validMoves;
     }
+
+    private static void addEnPassantMoveIfValid(int fromRow, int fromCol, Board board, int rowIncrement, Set<Move> validMoves) {
+        LastMove lastMove = board.getLastMove();
+
+        if (lastMove.getMove() == null) {
+            return;
+        }
+
+        if (Piece.getTypeFromPiece(board.getPieceAt(lastMove.getMove().toRow, lastMove.getMove().toCol)) == Piece.PAWN
+                && Math.abs(lastMove.getMove().fromRow - lastMove.getMove().toRow) == 2 // opponent pawn moved two squares
+                && lastMove.getMove().toRow == fromRow // opponent pawn is on the same rank
+                && Math.abs(lastMove.getMove().toCol - fromCol) == 1) { // opponent pawn is on an adjacent file
+            // capture is made on the square the pawn moved over
+            validMoves.add(new Move(fromRow, fromCol, fromRow + rowIncrement, lastMove.getMove().toCol, SpecialMove.EN_PASSANT));
+        }
+    }
+
 
     public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol, Board board) {
         int color = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));

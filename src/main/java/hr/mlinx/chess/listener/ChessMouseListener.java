@@ -2,14 +2,16 @@ package hr.mlinx.chess.listener;
 
 import hr.mlinx.chess.ChessGUI;
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.util.SoundPlayer;
-import hr.mlinx.chess.validation.LastMove;
+import hr.mlinx.chess.util.Warning;
 import hr.mlinx.chess.validation.MoveValidation;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 
 import static hr.mlinx.chess.ChessGUI.PADDING;
 import static hr.mlinx.chess.ChessGUI.SQUARE_SIZE;
@@ -29,11 +31,12 @@ public class ChessMouseListener extends MouseAdapter {
     public ChessMouseListener(
             ChessGUI chessGUI,
             Board board,
-            MoveValidation moveValidation) {
+            MoveValidation moveValidation,
+            SoundPlayer soundPlayer) {
         this.chessGUI = chessGUI;
         this.board = board;
         this.moveValidation = moveValidation;
-        soundPlayer = new SoundPlayer();
+        this.soundPlayer = soundPlayer;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class ChessMouseListener extends MouseAdapter {
         int col = Math.floorDiv(e.getX() - PADDING, SQUARE_SIZE);
         int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
 
-        if (Piece.getColorFromPiece(board.getPieceAt(row, col)) == LastMove.color ||
+        if (Piece.getColorFromPiece(board.getPieceAt(row, col)) == board.getLastMove().getColor() ||
                 moveValidation.isInvalidPlacement(row, col) ||
                 board.getPieceAt(row, col) == Piece.NONE) {
             return;
@@ -57,22 +60,29 @@ public class ChessMouseListener extends MouseAdapter {
         int col = Math.floorDiv(e.getX() - PADDING, SQUARE_SIZE);
         int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
 
-        if (selectedPiece != null && moveValidation.isValidMoveAndPlacement(selectedPiece.y, selectedPiece.x, row, col)) {
+        if (selectedPiece != null &&
+                moveValidation.isValidMovePlacement(selectedPiece.y, selectedPiece.x, row, col)) {
             if (row == selectedPiece.y && col == selectedPiece.x) {
                 selectedPiece = null;
                 chessGUI.repaint();
                 return;
             }
 
-            int fromPiece = board.getPieceAt(selectedPiece.y, selectedPiece.x);
-            int toPiece = board.getPieceAt(row, col);
+            Set<Move> validMoves = moveValidation.getValidMoves(selectedPiece.y, selectedPiece.x);
+            Move moveFromMouse = new Move(selectedPiece.y, selectedPiece.x, row, col);
+            Move moveToMake = validMoves.stream()
+                    .filter(move -> move.equals(moveFromMouse))
+                    .findFirst()
+                    .orElse(null);
 
-            board.doMove(selectedPiece.y, selectedPiece.x, row, col, fromPiece);
-            soundPlayer.playMoveSound(toPiece);
+            if (moveToMake != null) {
+                board.doMove(moveToMake);
 
-            prevMove = new Point(selectedPiece.x, selectedPiece.y);
-            newMove = new Point(col, row);
-            LastMove.switchMove();
+                prevMove = new Point(selectedPiece.x, selectedPiece.y);
+                newMove = new Point(col, row);
+            } else {
+                soundPlayer.playWarningSound(Warning.ILLEGAL_MOVE);
+            }
         }
 
         selectedPiece = null;
@@ -98,9 +108,10 @@ public class ChessMouseListener extends MouseAdapter {
     }
 
     public boolean isPossibleMoveSquare(int row, int col) {
-        Point currentSquare = new Point(col, row);
         return selectedPiece != null &&
-                moveValidation.getValidMoves(selectedPiece.y, selectedPiece.x).contains(currentSquare);
+                moveValidation
+                        .getValidMoves(selectedPiece.y, selectedPiece.x)
+                        .contains(new Move(selectedPiece.y, selectedPiece.x, row, col));
     }
 
     public Point getSelectedPiece() {

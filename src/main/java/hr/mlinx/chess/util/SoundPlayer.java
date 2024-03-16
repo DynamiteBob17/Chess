@@ -1,21 +1,47 @@
 package hr.mlinx.chess.util;
 
-import hr.mlinx.chess.board.Piece;
+import hr.mlinx.chess.board.MoveType;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SoundPlayer {
 
-    public void playMoveSound(int toPiece) {
+    private final Map<MoveType, String> moveTypeSounds;
+    private final Map<Warning, String> warningSounds;
+
+    public SoundPlayer() {
+        moveTypeSounds = new HashMap<>();
+        moveTypeSounds.put(MoveType.REGULAR, "move.wav");
+        moveTypeSounds.put(MoveType.CAPTURE, "capture.wav");
+        moveTypeSounds.put(MoveType.CHECK, "move-check.wav");
+        moveTypeSounds.put(MoveType.MATE, "game-end.wav");
+        moveTypeSounds.put(MoveType.CASTLE, "castle.wav");
+        moveTypeSounds.put(MoveType.PROMOTION, "promote.wav");
+
+        warningSounds = new HashMap<>();
+        warningSounds.put(Warning.ILLEGAL_MOVE, "illegal.wav");
+        warningSounds.put(Warning.TEN_SECONDS_LEFT, "tenseconds.wav");
+    }
+
+    public void playMoveSound(MoveType moveType) {
+        play(moveTypeSounds.get(moveType));
+    }
+
+    public void playWarningSound(Warning warning) {
+        play(warningSounds.get(warning));
+    }
+
+    private void play(String soundFilename) {
         try {
             Clip clip = AudioSystem.getClip();
-            String soundFile = (toPiece == Piece.NONE) ? "move.wav" : "capture.wav";
-            InputStream is = getClass().getClassLoader().getResourceAsStream(soundFile);
+            InputStream is = getClass().getClassLoader().getResourceAsStream(soundFilename);
 
             if (is == null) {
-                throw new IOException(soundFile + " not found");
+                throw new IOException(soundFilename + " not found");
             }
 
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(is);

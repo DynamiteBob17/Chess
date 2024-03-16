@@ -1,22 +1,22 @@
 package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 
-import java.awt.*;
 import java.util.Set;
 
 public class GeneralValidator {
 
     private GeneralValidator() {}
 
-    public static void checkDirection(int fromRow, int fromCol, int rowDir, int colDir, Board board, Set<Point> validMoves) {
+    public static void checkDirection(int fromRow, int fromCol, int rowDir, int colDir, Board board, Set<Move> validMoves) {
         for (int i = fromRow + rowDir, j = fromCol + colDir; i >= 0 && i < 8 && j >= 0 && j < 8; i += rowDir, j += colDir) {
             if (board.getPieceAt(i, j) == Piece.NONE) {
-                validMoves.add(new Point(j, i));
+                validMoves.add(new Move(fromRow, fromCol, i, j));
             } else {
                 if (Piece.getColorFromPiece(board.getPieceAt(i, j)) != Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol))) {
-                    validMoves.add(new Point(j, i));
+                    validMoves.add(new Move(fromRow, fromCol, i, j));
                 }
                 break;
             }

@@ -1,9 +1,9 @@
 package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,8 +12,8 @@ public class KingValidator {
     private KingValidator() {
     }
 
-    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Point> validMoves = new HashSet<>();
+    public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Move> validMoves = new HashSet<>();
 
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 
@@ -25,7 +25,7 @@ public class KingValidator {
                     int targetCol = fromCol + col;
                     int targetPiece = board.getPieceAt(targetRow, targetCol);
                     if (targetPiece == Piece.NONE || Piece.getColorFromPiece(targetPiece) != pieceColor) {
-                        validMoves.add(new Point(targetCol, targetRow));
+                        validMoves.add(new Move(fromRow, fromCol, targetRow, targetCol));
                     }
                 }
             }

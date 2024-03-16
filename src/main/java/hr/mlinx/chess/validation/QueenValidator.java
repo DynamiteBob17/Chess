@@ -1,8 +1,8 @@
 package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 
-import java.awt.*;
 import java.util.Set;
 
 public class QueenValidator {
@@ -10,8 +10,8 @@ public class QueenValidator {
     private QueenValidator() {
     }
 
-    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Point> validMoves = BishopValidator.getValidMoves(fromRow, fromCol, board);
+    public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Move> validMoves = BishopValidator.getValidMoves(fromRow, fromCol, board);
         validMoves.addAll(RookValidator.getValidMoves(fromRow, fromCol, board));
 
         return validMoves;

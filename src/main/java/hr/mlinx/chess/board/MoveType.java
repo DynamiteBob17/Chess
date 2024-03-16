@@ -1,2 +1,6 @@
-package hr.mlinx.chess.board;public class MoveType {
+package hr.mlinx.chess.board;
+
+// for move sounds
+public enum MoveType {
+    REGULAR, CAPTURE, CHECK, MATE, CASTLE, PROMOTION
 }

@@ -1,15 +1,15 @@
 package hr.mlinx.chess.cache;
 
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 
-import java.awt.*;
 import java.util.*;
 
 public class ValidMovesCache {
 
     private final Board board;
     private final int[][] chessBoard;
-    private final Set<Point> validMoves;
+    private final Set<Move> validMoves;
     private int fromRow;
     private int fromCol;
     private int piece;
@@ -33,7 +33,7 @@ public class ValidMovesCache {
         copyBoard();
     }
 
-    public Optional<Set<Point>> getValidMovesOrInvalidateCache(int fromRow, int fromCol, int piece) {
+    public Optional<Set<Move>> getValidMovesOrInvalidateCache(int fromRow, int fromCol, int piece) {
         if (this.fromRow != fromRow ||
                 this.fromCol != fromCol ||
                 this.piece != piece ||
@@ -48,7 +48,7 @@ public class ValidMovesCache {
         }
     }
 
-    public Set<Point> getValidMoves() {
+    public Set<Move> getValidMoves() {
         return validMoves;
     }
 

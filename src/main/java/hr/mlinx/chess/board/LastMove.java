@@ -1,14 +1,29 @@
-package hr.mlinx.chess.validation;
-
-import hr.mlinx.chess.board.Piece;
+package hr.mlinx.chess.board;
 
 public class LastMove {
 
-    private LastMove() {}
+    private Move move;
 
-    public static int color = Piece.BLACK;
+    private int color;
 
-    public static void switchMove() {
+    public LastMove() {
+        color = Piece.BLACK;
+    }
+
+    public void set(Move move) {
+        this.move = move;
+        switchMove();
+    }
+
+    public Move getMove() {
+        return move;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    private void switchMove() {
         color = color == Piece.WHITE
                 ? Piece.BLACK
                 : Piece.WHITE;

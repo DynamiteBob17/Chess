@@ -1,8 +1,8 @@
 package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.Move;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,8 +10,8 @@ public class RookValidator {
 
     private RookValidator() {}
 
-    public static Set<Point> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Point> validMoves = new HashSet<>();
+    public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
+        Set<Move> validMoves = new HashSet<>();
 
         GeneralValidator.checkDirection(fromRow, fromCol, -1, 0, board, validMoves); // Check left
         GeneralValidator.checkDirection(fromRow, fromCol, 1, 0, board, validMoves); // Check right
