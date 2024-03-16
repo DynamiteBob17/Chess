@@ -7,7 +7,8 @@ import java.util.Set;
 
 public class PawnValidator {
 
-    private PawnValidator() {}
+    private PawnValidator() {
+    }
 
     public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
         Set<Move> validMoves = new HashSet<>();
@@ -32,8 +33,13 @@ public class PawnValidator {
     }
 
     private static void addOneMoveUpIfValid(int fromRow, int fromCol, Board board, int rowIncrement, Set<Move> validMoves) {
-        if (board.getPieceAt(fromRow + rowIncrement, fromCol) == Piece.NONE) {
-            validMoves.add(new Move(fromRow, fromCol, fromRow + rowIncrement, fromCol));
+        int toRow = fromRow + rowIncrement;
+        if (board.getPieceAt(toRow, fromCol) == Piece.NONE) {
+            validMoves.add(new Move(
+                    fromRow, fromCol, toRow, fromCol,
+                    (toRow == 0 || toRow == 7) ? SpecialMove.PAWN_PROMOTION : null
+                    // Check if the pawn reached the end of the board and mark as promotion
+            ));
         }
     }
 
@@ -45,7 +51,12 @@ public class PawnValidator {
             if (targetRow >= 0 && targetRow < 8 && targetCol >= 0 && targetCol < 8) {
                 int targetPiece = board.getPieceAt(targetRow, targetCol);
                 if (Piece.getColorFromPiece(targetPiece) != pieceColor && targetPiece != Piece.NONE) {
-                    validMoves.add(new Move(fromRow, fromCol, targetRow, targetCol));
+                    validMoves.add(
+                            new Move(
+                                    fromRow, fromCol, targetRow, targetCol,
+                                    (targetRow == 0 || targetRow == 7) ? SpecialMove.PAWN_PROMOTION : null
+                                    // Check if the pawn reached the end of the board and mark as promotion
+                            ));
                 }
             }
         }

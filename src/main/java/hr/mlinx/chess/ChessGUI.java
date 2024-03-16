@@ -1,5 +1,6 @@
 package hr.mlinx.chess;
 
+import com.formdev.flatlaf.FlatDarkLaf;
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.listener.ChessMouseListener;
@@ -34,18 +35,6 @@ public class ChessGUI extends JPanel {
     private final transient Map<Integer, Image> pieceImagesSelected;
 
     public ChessGUI() {
-        soundPlayer = new SoundPlayer();
-        board = new Board(soundPlayer);
-        moveValidation = new MoveValidation(board);
-        chessMouseListener = new ChessMouseListener(
-                this,
-                board,
-                moveValidation,
-                soundPlayer
-        );
-
-        setBackground(Color.DARK_GRAY);
-
         pieceImagesRegular = new HashMap<>();
         pieceImagesSelected = new HashMap<>();
         String[] pieceTypes = {"p", "n", "b", "r", "q", "k"};
@@ -72,6 +61,23 @@ public class ChessGUI extends JPanel {
                         scaledImage
                 );
             }
+        }
+
+        soundPlayer = new SoundPlayer();
+        board = new Board(soundPlayer, pieceImagesRegular);
+        moveValidation = new MoveValidation(board);
+        chessMouseListener = new ChessMouseListener(
+                this,
+                board,
+                moveValidation,
+                soundPlayer
+        );
+
+        setBackground(Color.DARK_GRAY);
+        try {
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
         }
 
         this.addMouseListener(chessMouseListener);
