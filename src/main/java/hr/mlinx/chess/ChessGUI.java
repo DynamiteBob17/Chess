@@ -5,6 +5,7 @@ import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.listener.ChessMouseListener;
 import hr.mlinx.chess.util.ColorTinter;
 import hr.mlinx.chess.util.ImageLoader;
+import hr.mlinx.chess.util.SoundPlayer;
 import hr.mlinx.chess.validation.MoveValidation;
 
 import javax.swing.*;
@@ -14,6 +15,10 @@ import java.util.Map;
 
 // TODO: adjust sizes for different resolutions
 
+// TODO: MAYBE make each piece an object and store all the pieces that are on the board
+//  to not have to do a double 8x8 for loop when checking for attacks on the king or if there is a mate and other checks,
+//  but it's not THAT big of a deal since it's only ever 64 loop iterations, but still, consider it!
+
 public class ChessGUI extends JPanel {
 
     public static final int SQUARE_SIZE = 80;
@@ -21,6 +26,7 @@ public class ChessGUI extends JPanel {
     private static final Color WHITE_SQUARE_COLOR = new Color(238, 238, 210);
     private static final Color BLACK_SQUARE_COLOR = new Color(118, 150, 86);
 
+    private final transient SoundPlayer soundPlayer;
     private final transient Board board;
     private final transient MoveValidation moveValidation;
     private final transient ChessMouseListener chessMouseListener;
@@ -28,12 +34,14 @@ public class ChessGUI extends JPanel {
     private final transient Map<Integer, Image> pieceImagesSelected;
 
     public ChessGUI() {
-        board = new Board();
+        soundPlayer = new SoundPlayer();
+        board = new Board(soundPlayer);
         moveValidation = new MoveValidation(board);
         chessMouseListener = new ChessMouseListener(
                 this,
                 board,
-                moveValidation
+                moveValidation,
+                soundPlayer
         );
 
         setBackground(Color.DARK_GRAY);
