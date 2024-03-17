@@ -5,7 +5,7 @@ import hr.mlinx.chess.board.MoveType;
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class SoundPlayer {
@@ -14,7 +14,7 @@ public class SoundPlayer {
     private final Map<Warning, String> warningSounds;
 
     public SoundPlayer() {
-        moveTypeSounds = new HashMap<>();
+        moveTypeSounds = new EnumMap<>(MoveType.class);
         moveTypeSounds.put(MoveType.REGULAR, "move.wav");
         moveTypeSounds.put(MoveType.CAPTURE, "capture.wav");
         moveTypeSounds.put(MoveType.CHECK, "move-check.wav");
@@ -22,7 +22,7 @@ public class SoundPlayer {
         moveTypeSounds.put(MoveType.CASTLE, "castle.wav");
         moveTypeSounds.put(MoveType.PROMOTION, "promote.wav");
 
-        warningSounds = new HashMap<>();
+        warningSounds = new EnumMap<>(Warning.class);
         warningSounds.put(Warning.ILLEGAL_MOVE, "illegal.wav");
         warningSounds.put(Warning.TEN_SECONDS_LEFT, "tenseconds.wav");
     }
