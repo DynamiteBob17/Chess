@@ -3,6 +3,7 @@ package hr.mlinx.chess.validation;
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
+import hr.mlinx.chess.board.SpecialMove;
 
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class ValidMovesFilter {
     public void filter(Set<Move> validMoves) {
         validMoves.removeIf(this::capturesKing);
         validMoves.removeIf(this::putsOwnKingInCheck);
+        validMoves.removeIf(this::isIllegalCastling);
     }
 
     private boolean capturesKing(Move move) {
@@ -63,6 +65,26 @@ public class ValidMovesFilter {
         throw new IllegalStateException("King not found on the board.");
     }
 
+    private boolean isIllegalCastling(Move move) {
+        if (move.getSpecialMove() != SpecialMove.SHORT_CASTLE && move.getSpecialMove() != SpecialMove.LONG_CASTLE) {
+            return false;
+        }
+
+        int piece = board.getPieceAt(move.fromRow, move.fromCol);
+        int color = Piece.getColorFromPiece(piece);
+        int kingStartCol = 4;
+        int kingDestCol = (move.getSpecialMove() == SpecialMove.SHORT_CASTLE) ? 6 : 2;
+
+        for (int col = Math.min(kingStartCol, kingDestCol); col <= Math.max(kingStartCol, kingDestCol); ++col) {
+            if (isKingUnderAttack(move.fromRow, col, color, board)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     private boolean isKingUnderAttack(int kingRow, int kingCol, int kingColor, Board simulationBoard) {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -79,9 +101,10 @@ public class ValidMovesFilter {
 
     private boolean isPieceAttacked(int fromRow, int fromCol, int toRow, int toCol, Board simulationBoard) {
         int pieceType = Piece.getTypeFromPiece(simulationBoard.getPieceAt(fromRow, fromCol));
+
         return switch (pieceType) {
             case Piece.PAWN -> PawnValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
-            case Piece.KNIGHT -> KnightValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
+            case Piece.KNIGHT -> KnightValidator.isAttack(fromRow, fromCol, toRow, toCol);
             case Piece.BISHOP -> BishopValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
             case Piece.ROOK -> RookValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
             case Piece.QUEEN -> QueenValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
