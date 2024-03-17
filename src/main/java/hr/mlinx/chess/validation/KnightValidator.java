@@ -31,13 +31,13 @@ public class KnightValidator {
         return validMoves;
     }
 
-    public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol, Board board) {
+    public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol) {
         int[][] offsets = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};
-        int toPiece = board.getPieceAt(toRow, toCol);
 
         for (int[] offset : offsets) {
-            int movePiece = board.getPieceAt(fromRow + offset[0], fromCol + offset[1]);
-            if (toPiece == movePiece) {
+            int moveRow = fromRow + offset[0];
+            int moveCol = fromCol + offset[1];
+            if (moveRow == toRow && moveCol == toCol) {
                 return true;
             }
         }
