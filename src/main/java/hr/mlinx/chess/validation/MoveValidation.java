@@ -12,12 +12,10 @@ public class MoveValidation {
 
     private final Board board;
     private final ValidMovesCache validMovesCache;
-    private final ValidMovesFilter validMovesFilter;
 
     public MoveValidation(Board board) {
         this.board = board;
         validMovesCache = new ValidMovesCache(board);
-        validMovesFilter = new ValidMovesFilter(board);
     }
 
     public Set<Move> getValidMoves(int fromRow, int fromCol) {
@@ -37,11 +35,7 @@ public class MoveValidation {
         }
 
         Set<Move> validMoves = validMovesCache.getValidMoves();
-        validMoves.addAll(calculateValidMoves(fromRow, fromCol, board));
-
-        if (!validMoves.isEmpty()) {
-            validMovesFilter.filter(validMoves);
-        }
+        GeneralValidator.calculateLegalMoves(fromRow, fromCol, board, validMoves);
 
         validMovesCache.setNewValidMoves(
                 fromRow,
@@ -52,23 +46,11 @@ public class MoveValidation {
         return validMoves;
     }
 
-    public static Set<Move> calculateValidMoves(int fromRow, int fromCol, Board board) {
-        return switch (Piece.getTypeFromPiece(board.getPieceAt(fromRow, fromCol))) {
-            case Piece.PAWN -> PawnValidator.getValidMoves(fromRow, fromCol, board);
-            case Piece.KNIGHT -> KnightValidator.getValidMoves(fromRow, fromCol, board);
-            case Piece.BISHOP -> BishopValidator.getValidMoves(fromRow, fromCol, board);
-            case Piece.ROOK -> RookValidator.getValidMoves(fromRow, fromCol, board);
-            case Piece.QUEEN -> QueenValidator.getValidMoves(fromRow, fromCol, board);
-            case Piece.KING -> KingValidator.getValidMoves(fromRow, fromCol, board);
-            default -> Set.of();
-        };
-    }
-
-    public boolean isValidMovePlacement(int fromRow, int fromCol, int toRow, int toCol) {
+    public static boolean isValidMovePlacement(int fromRow, int fromCol, int toRow, int toCol) {
         return !(isInvalidPlacement(fromRow, fromCol) || isInvalidPlacement(toRow, toCol));
     }
 
-    public boolean isInvalidPlacement(int row, int col) {
+    public static boolean isInvalidPlacement(int row, int col) {
         return row < 0 || row >= 8 || col < 0 || col >= 8;
     }
 

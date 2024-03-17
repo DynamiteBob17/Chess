@@ -55,4 +55,21 @@ public class GeneralValidator {
         return true;
     }
 
+    private static Set<Move> calculateValidMoves(int fromRow, int fromCol, Board board) {
+        return switch (Piece.getTypeFromPiece(board.getPieceAt(fromRow, fromCol))) {
+            case Piece.PAWN -> PawnValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.KNIGHT -> KnightValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.BISHOP -> BishopValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.ROOK -> RookValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.QUEEN -> QueenValidator.getValidMoves(fromRow, fromCol, board);
+            case Piece.KING -> KingValidator.getValidMoves(fromRow, fromCol, board);
+            default -> Set.of();
+        };
+    }
+
+    public static void calculateLegalMoves(int fromRow, int fromCol, Board board, Set<Move> validMoves) {
+        validMoves.addAll(calculateValidMoves(fromRow, fromCol, board));
+        ValidMovesFilter.filter(validMoves, board);
+    }
+
 }

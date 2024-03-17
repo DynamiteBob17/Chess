@@ -45,7 +45,7 @@ public class ChessMouseListener extends MouseAdapter {
         int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
 
         if (Piece.getColorFromPiece(board.getPieceAt(row, col)) == board.getLastMove().getColor() ||
-                moveValidation.isInvalidPlacement(row, col) ||
+                MoveValidation.isInvalidPlacement(row, col) ||
                 board.getPieceAt(row, col) == Piece.NONE) {
             return;
         }
@@ -61,7 +61,7 @@ public class ChessMouseListener extends MouseAdapter {
         int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
 
         if (selectedPiece != null &&
-                moveValidation.isValidMovePlacement(selectedPiece.y, selectedPiece.x, row, col)) {
+                MoveValidation.isValidMovePlacement(selectedPiece.y, selectedPiece.x, row, col)) {
             if (row == selectedPiece.y && col == selectedPiece.x) {
                 selectedPiece = null;
                 chessGUI.repaint();

@@ -4,8 +4,8 @@ import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.board.SpecialMove;
+import hr.mlinx.chess.util.MoveSet;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class KingValidator {
@@ -14,7 +14,7 @@ public class KingValidator {
     }
 
     public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Move> validMoves = new HashSet<>();
+        Set<Move> validMoves = new MoveSet<>();
 
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 

@@ -1,8 +1,8 @@
 package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.*;
+import hr.mlinx.chess.util.MoveSet;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class PawnValidator {
@@ -11,7 +11,7 @@ public class PawnValidator {
     }
 
     public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Move> validMoves = new HashSet<>();
+        Set<Move> validMoves = new MoveSet<>();
 
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 

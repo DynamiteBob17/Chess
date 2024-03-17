@@ -2,6 +2,7 @@ package hr.mlinx.chess.cache;
 
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
+import hr.mlinx.chess.util.MoveSet;
 
 import java.util.*;
 
@@ -18,7 +19,7 @@ public class ValidMovesCache {
         this.board = board;
         chessBoard = new int[8][8];
         copyBoard();
-        validMoves = new HashSet<>();
+        validMoves = new MoveSet<>();
         fromRow = fromCol = piece = -1;
     }
 

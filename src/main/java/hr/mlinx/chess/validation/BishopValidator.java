@@ -2,8 +2,8 @@ package hr.mlinx.chess.validation;
 
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
+import hr.mlinx.chess.util.MoveSet;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class BishopValidator {
@@ -11,7 +11,7 @@ public class BishopValidator {
     private BishopValidator() {}
 
     public static Set<Move> getValidMoves(int fromRow, int fromCol, Board board) {
-        Set<Move> validMoves = new HashSet<>();
+        Set<Move> validMoves = new MoveSet<>();
 
         GeneralValidator.checkDirection(fromRow, fromCol, -1, -1, board, validMoves); // Check left-up
         GeneralValidator.checkDirection(fromRow, fromCol, -1, 1, board, validMoves); // Check left-down

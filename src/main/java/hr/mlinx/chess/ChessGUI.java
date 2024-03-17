@@ -29,7 +29,6 @@ public class ChessGUI extends JPanel {
 
     private final transient SoundPlayer soundPlayer;
     private final transient Board board;
-    private final transient MoveValidation moveValidation;
     private final transient ChessMouseListener chessMouseListener;
     private final transient Map<Integer, Image> pieceImagesRegular;
     private final transient Map<Integer, Image> pieceImagesSelected;
@@ -65,7 +64,7 @@ public class ChessGUI extends JPanel {
 
         soundPlayer = new SoundPlayer();
         board = new Board(soundPlayer, pieceImagesRegular);
-        moveValidation = new MoveValidation(board);
+        MoveValidation moveValidation = new MoveValidation(board);
         chessMouseListener = new ChessMouseListener(
                 this,
                 board,
@@ -150,7 +149,7 @@ public class ChessGUI extends JPanel {
 
     private void drawSelectedPiece(Graphics2D g2d) {
         if (chessMouseListener.getSelectedPiece() != null &&
-                !moveValidation.isInvalidPlacement(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x)) {
+                !MoveValidation.isInvalidPlacement(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x)) {
             Image selectedPieceImage = pieceImagesSelected.get(board.getPieceAt(chessMouseListener.getSelectedPiece().y, chessMouseListener.getSelectedPiece().x));
             int x = chessMouseListener.getInitialDrag().x - SQUARE_SIZE / 2;
             int y = chessMouseListener.getInitialDrag().y - SQUARE_SIZE / 2;

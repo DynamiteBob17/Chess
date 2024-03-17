@@ -9,19 +9,15 @@ import java.util.Set;
 
 public class ValidMovesFilter {
 
-    private final Board board;
+    private ValidMovesFilter() {}
 
-    public ValidMovesFilter(Board board) {
-        this.board = board;
+    public static void filter(Set<Move> validMoves, Board board) {
+        validMoves.removeIf(move -> capturesKing(move, board));
+        validMoves.removeIf(move -> putsOwnKingInCheck(move, board));
+        validMoves.removeIf(move -> isIllegalCastling(move, board));
     }
 
-    public void filter(Set<Move> validMoves) {
-        validMoves.removeIf(this::capturesKing);
-        validMoves.removeIf(this::putsOwnKingInCheck);
-        validMoves.removeIf(this::isIllegalCastling);
-    }
-
-    private boolean capturesKing(Move move) {
+    private static boolean capturesKing(Move move, Board board) {
         int piece = board.getPieceAt(move.fromRow, move.fromCol);
         int movePiece = board.getPieceAt(move.toRow, move.toCol);
 
@@ -29,7 +25,7 @@ public class ValidMovesFilter {
                 Piece.getColorFromPiece(piece) != Piece.getColorFromPiece(movePiece);
     }
 
-    private boolean putsOwnKingInCheck(Move move) {
+    private static boolean putsOwnKingInCheck(Move move, Board board) {
         Board simulationBoard = board.createCopy();
 
         int simulationMovePieceFrom = simulationBoard.getPieceAt(move.fromRow, move.fromCol);
@@ -47,7 +43,7 @@ public class ValidMovesFilter {
         return isKingUnderAttack(kingPosition[0], kingPosition[1], kingColor, simulationBoard);
     }
 
-    private int[] findKingPosition(int kingColor, Board simulationBoard) {
+    public static int[] findKingPosition(int kingColor, Board simulationBoard) {
         int[] kingPosition = new int[2];
 
         for (int row = 0; row < 8; row++) {
@@ -65,7 +61,35 @@ public class ValidMovesFilter {
         throw new IllegalStateException("King not found on the board.");
     }
 
-    private boolean isIllegalCastling(Move move) {
+    public static boolean isKingUnderAttack(int kingRow, int kingCol, int kingColor, Board simulationBoard) {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (Piece.getTypeFromPiece(simulationBoard.getPieceAt(row, col)) != Piece.NONE &&
+                        Piece.getColorFromPiece(simulationBoard.getPieceAt(row, col)) != kingColor &&
+                        isPieceAttacked(row, col, kingRow, kingCol, simulationBoard)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isPieceAttacked(int fromRow, int fromCol, int toRow, int toCol, Board simulationBoard) {
+        int pieceType = Piece.getTypeFromPiece(simulationBoard.getPieceAt(fromRow, fromCol));
+
+        return switch (pieceType) {
+            case Piece.PAWN -> PawnValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
+            case Piece.KNIGHT -> KnightValidator.isAttack(fromRow, fromCol, toRow, toCol);
+            case Piece.BISHOP -> BishopValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
+            case Piece.ROOK -> RookValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
+            case Piece.QUEEN -> QueenValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
+            case Piece.KING -> KingValidator.isAttack(fromRow, fromCol, toRow, toCol);
+            default -> false;
+        };
+    }
+
+    private static boolean isIllegalCastling(Move move, Board board) {
         if (move.getSpecialMove() != SpecialMove.SHORT_CASTLE && move.getSpecialMove() != SpecialMove.LONG_CASTLE) {
             return false;
         }
@@ -82,35 +106,6 @@ public class ValidMovesFilter {
         }
 
         return false;
-    }
-
-
-    private boolean isKingUnderAttack(int kingRow, int kingCol, int kingColor, Board simulationBoard) {
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                if (Piece.getTypeFromPiece(simulationBoard.getPieceAt(row, col)) != Piece.NONE &&
-                        Piece.getColorFromPiece(simulationBoard.getPieceAt(row, col)) != kingColor &&
-                        isPieceAttacked(row, col, kingRow, kingCol, simulationBoard)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isPieceAttacked(int fromRow, int fromCol, int toRow, int toCol, Board simulationBoard) {
-        int pieceType = Piece.getTypeFromPiece(simulationBoard.getPieceAt(fromRow, fromCol));
-
-        return switch (pieceType) {
-            case Piece.PAWN -> PawnValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
-            case Piece.KNIGHT -> KnightValidator.isAttack(fromRow, fromCol, toRow, toCol);
-            case Piece.BISHOP -> BishopValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
-            case Piece.ROOK -> RookValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
-            case Piece.QUEEN -> QueenValidator.isAttack(fromRow, fromCol, toRow, toCol, simulationBoard);
-            case Piece.KING -> KingValidator.isAttack(fromRow, fromCol, toRow, toCol);
-            default -> false;
-        };
     }
 
 }
