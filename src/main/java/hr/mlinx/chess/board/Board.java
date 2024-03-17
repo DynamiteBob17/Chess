@@ -73,50 +73,76 @@ public class Board {
         setPieceAt(move.toRow, move.toCol, pieceToMove);
         setPieceAt(move.fromRow, move.fromCol, Piece.NONE);
 
+        handleEnPassant(move, colorMakingMove);
+        handlePawnPromotion(move, colorMakingMove, isSimulation);
+        handleDisablingCastlingRights(move, pieceToMove, colorMakingMove);
+
+        handleCastling(move, colorMakingMove);
+    }
+
+    private void handleEnPassant(Move move, int colorMakingMove) {
         if (move.getSpecialMove() == SpecialMove.EN_PASSANT) {
             int capturedPawnRow = (colorMakingMove == Piece.WHITE) ? move.toRow + 1 : move.toRow - 1;
             int capturedPawnCol = move.toCol;
-
             setPieceAt(capturedPawnRow, capturedPawnCol, Piece.NONE);
-            return;
         }
+    }
 
+    private void handlePawnPromotion(Move move, int colorMakingMove, boolean isSimulation) {
         if (!isSimulation && move.getSpecialMove() == SpecialMove.PAWN_PROMOTION) {
             int promotedPiece = ChessDialog.showPromotionDialog(colorMakingMove, pieceImagesRegular);
             setPieceAt(move.toRow, move.toCol, promotedPiece);
-            return;
         }
+    }
 
+    private void handleDisablingCastlingRights(Move move, int pieceToMove, int colorMakingMove) {
         if (move.getSpecialMove() == null) { // Regular move, not castling
             int movedPieceType = Piece.getTypeFromPiece(pieceToMove);
 
-            switch (movedPieceType) {
-                case Piece.KING -> {
-                    if (colorMakingMove == Piece.WHITE) {
-                        whiteCanCastleKingside = false;
-                        whiteCanCastleQueenside = false;
-                    } else {
-                        blackCanCastleKingside = false;
-                        blackCanCastleQueenside = false;
-                    }
-                }
-                case Piece.ROOK -> {
-                    switch (move.fromRow * 10 + move.fromCol) {
-                        case 70 -> whiteCanCastleQueenside = false;
-                        case 77 -> whiteCanCastleKingside = false;
-                        case 0 -> blackCanCastleQueenside = false;
-                        case 7 -> blackCanCastleKingside = false;
-                    }
-                }
+            if (movedPieceType == Piece.KING) {
+                disableCastlingForKing(colorMakingMove);
+            } else if (movedPieceType == Piece.ROOK) {
+                disableCastlingForRook(move.fromRow, move.fromCol);
             }
         }
+    }
 
+    private void disableCastlingForKing(int colorMakingMove) {
+        if (colorMakingMove == Piece.WHITE) {
+            whiteCanCastleKingside = false;
+            whiteCanCastleQueenside = false;
+        } else {
+            blackCanCastleKingside = false;
+            blackCanCastleQueenside = false;
+        }
+    }
+
+    private void disableCastlingForRook(int row, int col) {
+        switch (row * 10 + col) {
+            case 70 -> whiteCanCastleQueenside = false;
+            case 77 -> whiteCanCastleKingside = false;
+            case 0 -> blackCanCastleQueenside = false;
+            case 7 -> blackCanCastleKingside = false;
+        }
+    }
+
+    private void handleCastling(Move move, int colorMakingMove) {
         if (move.getSpecialMove() == SpecialMove.SHORT_CASTLE) {
             if (colorMakingMove == Piece.WHITE) {
                 setPieceAt(7, 5, Piece.ROOK | Piece.WHITE);
                 setPieceAt(7, 7, Piece.NONE);
+            } else {
+                setPieceAt(0, 5, Piece.ROOK | Piece.BLACK);
+                setPieceAt(0, 7, Piece.NONE);
             }
-            // ... similar logic for black
+        } else if (move.getSpecialMove() == SpecialMove.LONG_CASTLE) {
+            if (colorMakingMove == Piece.WHITE) {
+                setPieceAt(7, 3, Piece.ROOK | Piece.WHITE);
+                setPieceAt(7, 0, Piece.NONE);
+            } else {
+                setPieceAt(0, 3, Piece.ROOK | Piece.BLACK);
+                setPieceAt(0, 0, Piece.NONE);
+            }
         }
     }
 
@@ -156,51 +182,5 @@ public class Board {
     public boolean blackCanCastleQueenside() {
         return blackCanCastleQueenside;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int[] row : chessBoard) {
-            for (int piece : row) {
-                stringBuilder.append(pieceDescriptor(piece)).append(" ");
-            }
-            stringBuilder.append("\n");
-        }
-        return stringBuilder.toString();
-    }
-
-    private String pieceDescriptor(int piece) {
-        switch (piece) {
-            case Piece.NONE:
-                return ".";
-            case Piece.WHITE | Piece.PAWN:
-                return "WP";
-            case Piece.WHITE | Piece.KNIGHT:
-                return "WN";
-            case Piece.WHITE | Piece.BISHOP:
-                return "WB";
-            case Piece.WHITE | Piece.ROOK:
-                return "WR";
-            case Piece.WHITE | Piece.QUEEN:
-                return "WQ";
-            case Piece.WHITE | Piece.KING:
-                return "WK";
-            case Piece.BLACK | Piece.PAWN:
-                return "BP";
-            case Piece.BLACK | Piece.KNIGHT:
-                return "BN";
-            case Piece.BLACK | Piece.BISHOP:
-                return "BB";
-            case Piece.BLACK | Piece.ROOK:
-                return "BR";
-            case Piece.BLACK | Piece.QUEEN:
-                return "BQ";
-            case Piece.BLACK | Piece.KING:
-                return "BK";
-            default:
-                return "?";
-        }
-    }
-
 
 }

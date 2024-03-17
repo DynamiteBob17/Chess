@@ -18,6 +18,13 @@ public class KingValidator {
 
         int pieceColor = Piece.getColorFromPiece(board.getPieceAt(fromRow, fromCol));
 
+        addKingMoves(fromRow, fromCol, board, pieceColor, validMoves);
+        addCastlingMoves(fromRow, fromCol, board, pieceColor, validMoves);
+
+        return validMoves;
+    }
+
+    private static void addKingMoves(int fromRow, int fromCol, Board board, int pieceColor, Set<Move> validMoves) {
         // King can move 1 square in any direction
         for (int row = -1; row <= 1; row++) {
             for (int col = -1; col <= 1; col++) {
@@ -31,30 +38,37 @@ public class KingValidator {
                 }
             }
         }
+    }
 
-        // Castling moves
+    private static void addCastlingMoves(int fromRow, int fromCol, Board board, int pieceColor, Set<Move> validMoves) {
         int kingRow = (pieceColor == Piece.WHITE) ? 7 : 0;
         int kingCol = 4;
 
         if (fromCol != kingCol) {
-            return validMoves;
+            return;
         }
 
-        if ((pieceColor == Piece.WHITE && fromRow == 7) || (pieceColor == Piece.BLACK && fromRow == 0)) {
-            boolean canCastleKingside = (pieceColor == Piece.WHITE) ? board.whiteCanCastleKingside() : board.blackCanCastleKingside();
-            boolean canCastleQueenside = (pieceColor == Piece.WHITE) ? board.whiteCanCastleQueenside() : board.blackCanCastleQueenside();
-
-            if (canCastleKingside && checkCastlingPathClear(board, kingRow, kingCol, 7)) {
-                validMoves.add(new Move(kingRow, kingCol, kingRow, 6, SpecialMove.SHORT_CASTLE));
-            }
-
-            if (canCastleQueenside && checkCastlingPathClear(board, kingRow, kingCol, 0)) {
-                validMoves.add(new Move(kingRow, kingCol, kingRow, 2, SpecialMove.LONG_CASTLE));
-            }
+        if (isKingOnStartingRow(pieceColor, fromRow) && canCastle(board, pieceColor)) {
+            addCastlingMoveIfClear(board, kingRow, kingCol, 7, SpecialMove.SHORT_CASTLE, validMoves);
+            addCastlingMoveIfClear(board, kingRow, kingCol, 0, SpecialMove.LONG_CASTLE, validMoves);
         }
-
-        return validMoves;
     }
+
+    private static boolean isKingOnStartingRow(int pieceColor, int fromRow) {
+        return (pieceColor == Piece.WHITE && fromRow == 7) || (pieceColor == Piece.BLACK && fromRow == 0);
+    }
+
+    private static boolean canCastle(Board board, int pieceColor) {
+        return (pieceColor == Piece.WHITE) ? board.whiteCanCastleKingside() || board.whiteCanCastleQueenside() :
+                board.blackCanCastleKingside() || board.blackCanCastleQueenside();
+    }
+
+    private static void addCastlingMoveIfClear(Board board, int kingRow, int kingCol, int rookCol, SpecialMove specialMove, Set<Move> validMoves) {
+        if (checkCastlingPathClear(board, kingRow, kingCol, rookCol)) {
+            validMoves.add(new Move(kingRow, kingCol, kingRow, (rookCol == 7) ? 6 : 2, specialMove));
+        }
+    }
+
 
     private static boolean checkCastlingPathClear(Board board, int kingRow, int kingCol, int rookCol) {
         int increment = (rookCol > kingCol) ? 1 : -1;
@@ -65,6 +79,7 @@ public class KingValidator {
         }
         return true;
     }
+
 
     public static boolean isAttack(int fromRow, int fromCol, int toRow, int toCol) {
         int rowDiff = Math.abs(toRow - fromRow);
