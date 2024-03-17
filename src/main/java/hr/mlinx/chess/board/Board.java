@@ -141,6 +141,10 @@ public class Board {
     }
 
     private void handleCastling(Move move, int colorMakingMove) {
+        if (!(move.getSpecialMove() == SpecialMove.SHORT_CASTLE || move.getSpecialMove() == SpecialMove.LONG_CASTLE)) {
+            return;
+        }
+
         int rookRow = (colorMakingMove == Piece.WHITE) ? 7 : 0;
 
         if (move.getSpecialMove() == SpecialMove.SHORT_CASTLE) {
