@@ -2,9 +2,9 @@ package hr.mlinx.chess;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import hr.mlinx.chess.board.Board;
-import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.listener.ChessMouseListener;
+import hr.mlinx.chess.ui.Clock;
 import hr.mlinx.chess.util.ColorTinter;
 import hr.mlinx.chess.util.ImageLoader;
 import hr.mlinx.chess.util.SoundPlayer;
@@ -24,12 +24,12 @@ import java.util.Map;
 public class ChessGUI extends JPanel {
 
     public static final int SQUARE_SIZE = 80;
-    public static final int PADDING = 300;
+    private static final int PADDING = 30;
     private static final Color WHITE_SQUARE_COLOR = new Color(238, 238, 210);
     private static final Color BLACK_SQUARE_COLOR = new Color(118, 150, 86);
 
-    private final transient SoundPlayer soundPlayer;
     private final transient Board board;
+    private final transient Clock clock;
     private final transient ChessMouseListener chessMouseListener;
     private final transient Map<Integer, Image> pieceImagesRegular;
 
@@ -50,33 +50,61 @@ public class ChessGUI extends JPanel {
             }
         }
 
-        soundPlayer = new SoundPlayer();
+        SoundPlayer soundPlayer = new SoundPlayer();
         board = new Board(soundPlayer, pieceImagesRegular);
         MoveValidation moveValidation = new MoveValidation(board);
-        chessMouseListener = new ChessMouseListener(
-                this,
-                board,
-                moveValidation,
-                soundPlayer
-        );
 
-        setBackground(Color.DARK_GRAY);
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
 
+        clock = new Clock(180, 1, soundPlayer);
+        chessMouseListener = new ChessMouseListener(
+                this,
+                board,
+                moveValidation,
+                soundPlayer,
+                clock
+        );
+
         this.addMouseListener(chessMouseListener);
         this.addMouseMotionListener(chessMouseListener);
+        this.setPreferredSize(new Dimension(SQUARE_SIZE * 8, SQUARE_SIZE * 8));
+
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints gbcChessBoard = new GridBagConstraints();
+        gbcChessBoard.gridx = 0;
+        gbcChessBoard.gridy = 0;
+        gbcChessBoard.weightx = 1.0;
+        gbcChessBoard.weighty = 1.0;
+        gbcChessBoard.fill = GridBagConstraints.BOTH;
+        gbcChessBoard.insets = new Insets(PADDING, PADDING, PADDING, 0);
+
+        mainPanel.add(this, gbcChessBoard);
+
+        GridBagConstraints gbcClock = new GridBagConstraints();
+        gbcClock.gridx = 1;
+        gbcClock.gridy = 0;
+        gbcClock.fill = GridBagConstraints.VERTICAL;
+        gbcClock.insets = new Insets(260, PADDING, 260, PADDING);
+        gbcClock.anchor = GridBagConstraints.CENTER;
+
+        mainPanel.add(clock, gbcClock);
 
         JFrame frame = new JFrame("Chess Game");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(SQUARE_SIZE * 8 + PADDING * 2, SQUARE_SIZE * 8 + SQUARE_SIZE * 2);
+        frame.setBackground(Color.DARK_GRAY);
         frame.setResizable(false);
-        frame.add(this);
+        frame.setLayout(new BorderLayout());
+        frame.add(mainPanel);
+        frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        clock.start();
     }
 
     @Override
@@ -91,11 +119,11 @@ public class ChessGUI extends JPanel {
                 Color squareColor = getSquareColor(row, col);
 
                 if (chessMouseListener.isHighlightedSquare(row, col)) {
-                    squareColor = ColorTinter.tintSquareYellow(getSquareColor(row, col));
+                    squareColor = ColorTinter.tintColorYellow(getSquareColor(row, col));
                 }
 
                 if (chessMouseListener.isPossibleMoveSquare(row, col)) {
-                    squareColor = ColorTinter.tintSquareBlue(getSquareColor(row, col));
+                    squareColor = ColorTinter.tintColorBlue(getSquareColor(row, col));
                 }
 
                 drawSquare(g2d, row, col, squareColor);
@@ -116,8 +144,8 @@ public class ChessGUI extends JPanel {
     }
 
     private void drawSquare(Graphics2D g2d, int row, int col, Color squareColor) {
-        int x = col * SQUARE_SIZE + PADDING;
-        int y = row * SQUARE_SIZE + SQUARE_SIZE;
+        int x = col * SQUARE_SIZE;
+        int y = row * SQUARE_SIZE;
         g2d.setColor(squareColor);
         g2d.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
     }
@@ -129,8 +157,8 @@ public class ChessGUI extends JPanel {
         if (piece != Piece.NONE &&
                 (chessMouseListener.getSelectedPiece() == null || !chessMouseListener.getSelectedPiece().equals(currentSquare))) {
             Image pieceImage = pieceImagesRegular.get(piece);
-            int x = col * SQUARE_SIZE + PADDING;
-            int y = row * SQUARE_SIZE + SQUARE_SIZE;
+            int x = col * SQUARE_SIZE;
+            int y = row * SQUARE_SIZE;
             g2d.drawImage(pieceImage, x, y, SQUARE_SIZE, SQUARE_SIZE, this);
         }
     }

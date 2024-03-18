@@ -2,8 +2,10 @@ package hr.mlinx.chess.listener;
 
 import hr.mlinx.chess.ChessGUI;
 import hr.mlinx.chess.board.Board;
+import hr.mlinx.chess.board.LastMove;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
+import hr.mlinx.chess.ui.Clock;
 import hr.mlinx.chess.util.SoundPlayer;
 import hr.mlinx.chess.util.Warning;
 import hr.mlinx.chess.validation.MoveValidation;
@@ -13,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 
-import static hr.mlinx.chess.ChessGUI.PADDING;
 import static hr.mlinx.chess.ChessGUI.SQUARE_SIZE;
 
 public class ChessMouseListener extends MouseAdapter {
@@ -22,6 +23,7 @@ public class ChessMouseListener extends MouseAdapter {
     private final Board board;
     private final MoveValidation moveValidation;
     private final SoundPlayer soundPlayer;
+    private final Clock clock;
 
     private Point selectedPiece;
     private Point initialDrag;
@@ -32,17 +34,19 @@ public class ChessMouseListener extends MouseAdapter {
             ChessGUI chessGUI,
             Board board,
             MoveValidation moveValidation,
-            SoundPlayer soundPlayer) {
+            SoundPlayer soundPlayer,
+            Clock clock) {
         this.chessGUI = chessGUI;
         this.board = board;
         this.moveValidation = moveValidation;
         this.soundPlayer = soundPlayer;
+        this.clock = clock;
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        int col = Math.floorDiv(e.getX() - PADDING, SQUARE_SIZE);
-        int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
+        int col = Math.floorDiv(e.getX(), SQUARE_SIZE);
+        int row = Math.floorDiv(e.getY(), SQUARE_SIZE);
 
         if (Piece.getColorFromPiece(board.getPieceAt(row, col)) == board.getLastMove().getColor() ||
                 MoveValidation.isInvalidPlacement(row, col) ||
@@ -57,8 +61,8 @@ public class ChessMouseListener extends MouseAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int col = Math.floorDiv(e.getX() - PADDING, SQUARE_SIZE);
-        int row = Math.floorDiv(e.getY() - SQUARE_SIZE, SQUARE_SIZE);
+        int col = Math.floorDiv(e.getX(), SQUARE_SIZE);
+        int row = Math.floorDiv(e.getY(), SQUARE_SIZE);
 
         if (selectedPiece != null &&
                 MoveValidation.isValidMovePlacement(selectedPiece.y, selectedPiece.x, row, col)) {
@@ -77,6 +81,8 @@ public class ChessMouseListener extends MouseAdapter {
 
             if (moveToMake != null) {
                 board.doMove(moveToMake);
+
+                clock.switchTurn();
 
                 prevMove = new Point(selectedPiece.x, selectedPiece.y);
                 newMove = new Point(col, row);

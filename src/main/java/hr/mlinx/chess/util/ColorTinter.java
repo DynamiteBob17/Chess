@@ -6,7 +6,7 @@ public class ColorTinter {
 
     private ColorTinter() {}
 
-    public static Color tintSquareYellow(Color originalColor) {
+    public static Color tintColorYellow(Color originalColor) {
         int colorAdjustment = 100;
 
         int red = Math.min(255, Math.max(0, originalColor.getRed() + colorAdjustment));
@@ -16,7 +16,7 @@ public class ColorTinter {
         return new Color(red, green, blue);
     }
 
-    public static Color tintSquareBlue(Color originalColor) {
+    public static Color tintColorBlue(Color originalColor) {
         int colorAdjustment = 33;
 
         int red = Math.min(255, Math.max(0, originalColor.getRed() - colorAdjustment));
