@@ -1,6 +1,6 @@
 package hr.mlinx.chess.board;
 
-import hr.mlinx.chess.util.ChessDialog;
+import hr.mlinx.chess.ui.Clock;
 import hr.mlinx.chess.util.FENParser;
 import hr.mlinx.chess.util.MoveSet;
 import hr.mlinx.chess.util.SoundPlayer;
@@ -18,6 +18,7 @@ public class Board {
     private LastMove lastMove;
     private final SoundPlayer soundPlayer;
     private final Map<Integer, Image> pieceImagesRegular;
+    private boolean gameOver = false;
 
     private boolean whiteCanCastleKingside = true;
     private boolean whiteCanCastleQueenside = true;
@@ -64,6 +65,10 @@ public class Board {
     }
 
     public void doMove(Move move) {
+        if (gameOver) {
+            return;
+        }
+
         int toPiece = getPieceAt(move.toRow, move.toCol);
         int colorMakingMove = Piece.getColorFromPiece(getPieceAt(move.fromRow, move.fromCol));
 
@@ -73,6 +78,10 @@ public class Board {
     }
 
     public void doMoveForSimulation(Move move) {
+        if (gameOver) {
+            return;
+        }
+
         makeMove(move, true);
     }
 
@@ -100,7 +109,7 @@ public class Board {
 
     private void handlePawnPromotion(Move move, int colorMakingMove, boolean isSimulation) {
         if (!isSimulation && move.getSpecialMove() == SpecialMove.PAWN_PROMOTION) {
-            int promotedPiece = ChessDialog.showPromotionDialog(colorMakingMove, pieceImagesRegular);
+            int promotedPiece = Clock.ChessDialog.showPromotionDialog(colorMakingMove, pieceImagesRegular);
             setPieceAt(move.toRow, move.toCol, promotedPiece);
         }
     }
@@ -168,7 +177,7 @@ public class Board {
         SpecialMove specialMove = move.getSpecialMove();
 
         if (isMate(colorMakingMove)) {
-            soundPlayer.playMoveSound(MoveType.MATE);
+            soundPlayer.playMoveSound(MoveType.GAME_OVER);
         } else if (isCheck(colorMakingMove)) {
             soundPlayer.playMoveSound(MoveType.CHECK);
         } else if (specialMove == SpecialMove.PAWN_PROMOTION) {
@@ -184,7 +193,7 @@ public class Board {
         }
     }
 
-    public boolean isMate(int colorMakingMove) {
+    private boolean isMate(int colorMakingMove) {
         Set<Move> legalMoves = new MoveSet<>();
 
         for (int row = 0; row < 8; ++row) {
@@ -201,6 +210,7 @@ public class Board {
             }
         }
 
+        gameOver = true;
         return true;
     }
 
@@ -216,6 +226,24 @@ public class Board {
 
     public LastMove getLastMove() {
         return lastMove;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver() {
+        gameOver = true;
+    }
+
+    public void newGame() {
+        initializeClassicPosition();
+        lastMove = new LastMove();
+        gameOver = false;
+        whiteCanCastleKingside = true;
+        whiteCanCastleQueenside = true;
+        blackCanCastleKingside = true;
+        blackCanCastleQueenside = true;
     }
 
     public boolean whiteCanCastleKingside() {

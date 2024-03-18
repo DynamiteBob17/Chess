@@ -25,6 +25,7 @@ public class FENParser {
                 col++;
             }
         }
+
         // ... (Remaining FEN parsing: active color, castling rights, en passant, etc.)
         return board;
     }

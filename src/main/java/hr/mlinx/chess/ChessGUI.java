@@ -1,12 +1,12 @@
 package hr.mlinx.chess;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.listener.ChessMouseListener;
 import hr.mlinx.chess.ui.Clock;
 import hr.mlinx.chess.util.ColorTinter;
-import hr.mlinx.chess.util.ImageLoader;
+import hr.mlinx.chess.ui.ImageLoader;
+import hr.mlinx.chess.ui.Scaling;
 import hr.mlinx.chess.util.SoundPlayer;
 import hr.mlinx.chess.validation.MoveValidation;
 
@@ -15,21 +15,15 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: adjust sizes for different resolutions
-
-// TODO: MAYBE make each piece an object and store all the pieces that are on the board
-//  to not have to do a double 8x8 for loop when checking for attacks on the king or if there is a mate and other checks,
-//  but it's not THAT big of a deal since it's only ever 64 loop iterations, but still, consider it!
-
 public class ChessGUI extends JPanel {
 
-    public static final int SQUARE_SIZE = 80;
-    private static final int PADDING = 30;
+    public static final int SQUARE_SIZE = (int) (80 * Scaling.SCALE);
+    private static final int PADDING = (int) (30 * Scaling.SCALE);
+    private static final int MARGIN = (int) (260 * Scaling.SCALE);
     private static final Color WHITE_SQUARE_COLOR = new Color(238, 238, 210);
     private static final Color BLACK_SQUARE_COLOR = new Color(118, 150, 86);
 
     private final transient Board board;
-    private final transient Clock clock;
     private final transient ChessMouseListener chessMouseListener;
     private final transient Map<Integer, Image> pieceImagesRegular;
 
@@ -54,13 +48,9 @@ public class ChessGUI extends JPanel {
         board = new Board(soundPlayer, pieceImagesRegular);
         MoveValidation moveValidation = new MoveValidation(board);
 
-        try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+        Scaling.setUIPresets();
 
-        clock = new Clock(180, 1, soundPlayer);
+        Clock clock = new Clock(6, 1, board, soundPlayer);
         chessMouseListener = new ChessMouseListener(
                 this,
                 board,
@@ -89,7 +79,7 @@ public class ChessGUI extends JPanel {
         gbcClock.gridx = 1;
         gbcClock.gridy = 0;
         gbcClock.fill = GridBagConstraints.VERTICAL;
-        gbcClock.insets = new Insets(260, PADDING, 260, PADDING);
+        gbcClock.insets = new Insets(MARGIN, PADDING, MARGIN, PADDING);
         gbcClock.anchor = GridBagConstraints.CENTER;
 
         mainPanel.add(clock, gbcClock);
@@ -103,8 +93,6 @@ public class ChessGUI extends JPanel {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
-        clock.start();
     }
 
     @Override

@@ -18,7 +18,7 @@ public class SoundPlayer {
         moveTypeSounds.put(MoveType.REGULAR, "move.wav");
         moveTypeSounds.put(MoveType.CAPTURE, "capture.wav");
         moveTypeSounds.put(MoveType.CHECK, "move-check.wav");
-        moveTypeSounds.put(MoveType.MATE, "game-end.wav");
+        moveTypeSounds.put(MoveType.GAME_OVER, "game-end.wav");
         moveTypeSounds.put(MoveType.CASTLE, "castle.wav");
         moveTypeSounds.put(MoveType.PROMOTION, "promote.wav");
 

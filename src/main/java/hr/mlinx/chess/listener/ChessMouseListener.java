@@ -2,7 +2,6 @@ package hr.mlinx.chess.listener;
 
 import hr.mlinx.chess.ChessGUI;
 import hr.mlinx.chess.board.Board;
-import hr.mlinx.chess.board.LastMove;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 import hr.mlinx.chess.ui.Clock;
@@ -61,6 +60,12 @@ public class ChessMouseListener extends MouseAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        if (board.isGameOver()) {
+            selectedPiece = null;
+            chessGUI.repaint();
+            return;
+        }
+
         int col = Math.floorDiv(e.getX(), SQUARE_SIZE);
         int row = Math.floorDiv(e.getY(), SQUARE_SIZE);
 
@@ -82,6 +87,12 @@ public class ChessMouseListener extends MouseAdapter {
             if (moveToMake != null) {
                 board.doMove(moveToMake);
 
+                Move lastMove = board.getLastMove().getMove();
+
+                if (lastMove != null) {
+                    clock.start();
+                }
+
                 clock.switchTurn();
 
                 prevMove = new Point(selectedPiece.x, selectedPiece.y);
@@ -89,6 +100,11 @@ public class ChessMouseListener extends MouseAdapter {
             } else {
                 soundPlayer.playWarningSound(Warning.ILLEGAL_MOVE);
             }
+        }
+
+        if (board.isGameOver()) {
+            Clock.ChessDialog.showGameOverDialog(board.getLastMove().getColor());
+            clock.stop();
         }
 
         selectedPiece = null;
@@ -114,6 +130,10 @@ public class ChessMouseListener extends MouseAdapter {
     }
 
     public boolean isPossibleMoveSquare(int row, int col) {
+        if (board.isGameOver()) {
+            return false;
+        }
+
         return selectedPiece != null &&
                 moveValidation
                         .getValidMoves(selectedPiece.y, selectedPiece.x)

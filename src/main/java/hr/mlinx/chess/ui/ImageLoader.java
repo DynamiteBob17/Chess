@@ -1,4 +1,4 @@
-package hr.mlinx.chess.util;
+package hr.mlinx.chess.ui;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
