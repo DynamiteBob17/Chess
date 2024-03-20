@@ -1,9 +1,11 @@
 package hr.mlinx.chess.listener;
 
 import hr.mlinx.chess.ChessGUI;
+import hr.mlinx.chess.ai.ChessEngine;
 import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
+import hr.mlinx.chess.ui.ChessDialog;
 import hr.mlinx.chess.ui.Clock;
 import hr.mlinx.chess.util.SoundPlayer;
 import hr.mlinx.chess.util.Warning;
@@ -29,6 +31,8 @@ public class ChessMouseListener extends MouseAdapter {
     private Point prevMove;
     private Point newMove;
 
+    private final ChessEngine chessEngine;
+
     public ChessMouseListener(
             ChessGUI chessGUI,
             Board board,
@@ -40,6 +44,7 @@ public class ChessMouseListener extends MouseAdapter {
         this.moveValidation = moveValidation;
         this.soundPlayer = soundPlayer;
         this.clock = clock;
+        chessEngine = new ChessEngine(board);
     }
 
     @Override
@@ -103,12 +108,39 @@ public class ChessMouseListener extends MouseAdapter {
         }
 
         if (board.isGameOver()) {
-            Clock.ChessDialog.showGameOverDialog(board.getLastMove().getColor());
-            clock.stop();
+            gameOver();
         }
+
+        makeChessEngineMove();
 
         selectedPiece = null;
         chessGUI.repaint();
+    }
+
+    private void gameOver() {
+        ChessDialog.showGameOverDialog(board.getLastMove().getColor());
+        board.newGame();
+        clock.newGame();
+        prevMove = null;
+        newMove = null;
+        chessGUI.repaint();
+    }
+
+    private void makeChessEngineMove() {
+        if (!board.isGameOver() && board.getLastMove().getColor() == Piece.WHITE) {
+            new Thread(() -> {
+                Move move = chessEngine.getBestMove();
+                board.doMove(move);
+                clock.switchTurn();
+                prevMove = new Point(move.fromCol, move.fromRow);
+                newMove = new Point(move.toCol, move.toRow);
+                chessGUI.repaint();
+
+                if (board.isGameOver()) {
+                    gameOver();
+                }
+            }).start();
+        }
     }
 
     @Override

@@ -35,7 +35,7 @@ public class MoveValidation {
         }
 
         Set<Move> validMoves = validMovesCache.getValidMoves();
-        GeneralValidator.calculateLegalMoves(fromRow, fromCol, board, validMoves);
+        validMoves.addAll(GeneralValidator.getLegalMoves(fromRow, fromCol, board));
 
         validMovesCache.setNewValidMoves(
                 fromRow,

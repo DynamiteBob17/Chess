@@ -50,7 +50,7 @@ public class ChessGUI extends JPanel {
 
         Scaling.setUIPresets();
 
-        Clock clock = new Clock(6, 1, board, soundPlayer);
+        Clock clock = new Clock(180, 5, board, soundPlayer);
         chessMouseListener = new ChessMouseListener(
                 this,
                 board,

@@ -1,6 +1,6 @@
 package hr.mlinx.chess.board;
 
-import hr.mlinx.chess.ui.Clock;
+import hr.mlinx.chess.ui.ChessDialog;
 import hr.mlinx.chess.util.FENParser;
 import hr.mlinx.chess.util.MoveSet;
 import hr.mlinx.chess.util.SoundPlayer;
@@ -25,6 +25,10 @@ public class Board {
     private boolean blackCanCastleKingside = true;
     private boolean blackCanCastleQueenside = true;
 
+    private int numOfHalfMoves = 0;
+    private int numOfFullMoves = 1;
+    private Square enPassantTargetSquare;
+
     public Board(SoundPlayer soundPlayer, Map<Integer, Image> pieceImagesRegular) {
         chessBoard = new int[8][8];
         initializeClassicPosition();
@@ -33,10 +37,20 @@ public class Board {
         this.pieceImagesRegular = pieceImagesRegular;
     }
 
-    public Board(int[][] chessBoard) {
+    private Board(
+            int[][] chessBoard,
+            boolean whiteCanCastleKingside,
+            boolean whiteCanCastleQueenside,
+            boolean blackCanCastleKingside,
+            boolean blackCanCastleQueenside
+    ) {
         this.chessBoard = chessBoard;
         soundPlayer = null;
         pieceImagesRegular = null;
+        this.whiteCanCastleKingside = whiteCanCastleKingside;
+        this.whiteCanCastleQueenside = whiteCanCastleQueenside;
+        this.blackCanCastleKingside = blackCanCastleKingside;
+        this.blackCanCastleQueenside = blackCanCastleQueenside;
     }
 
     public Board createCopy() {
@@ -44,10 +58,17 @@ public class Board {
         for (int i = 0; i < chessBoard.length; i++) {
             chessBoardCopy[i] = Arrays.copyOf(chessBoard[i], chessBoard[i].length);
         }
-        return new Board(chessBoardCopy);
+
+        return new Board(
+                chessBoardCopy,
+                whiteCanCastleKingside,
+                whiteCanCastleQueenside,
+                blackCanCastleKingside,
+                blackCanCastleQueenside
+        );
     }
 
-    private void initializeClassicPosition(){
+    private void initializeClassicPosition() {
         String initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         System.arraycopy(FENParser.parseFEN(initialFen), 0, chessBoard, 0, chessBoard.length);
     }
@@ -88,6 +109,7 @@ public class Board {
     private void makeMove(Move move, boolean isSimulation) {
         int pieceToMove = getPieceAt(move.fromRow, move.fromCol);
         int colorMakingMove = Piece.getColorFromPiece(pieceToMove);
+        int toPiece = getPieceAt(move.toRow, move.toCol);
 
         setPieceAt(move.toRow, move.toCol, pieceToMove);
         setPieceAt(move.fromRow, move.fromCol, Piece.NONE);
@@ -97,6 +119,27 @@ public class Board {
         handleDisablingCastlingRights(move, pieceToMove, colorMakingMove);
 
         handleCastling(move, colorMakingMove);
+
+        if (colorMakingMove == Piece.BLACK) {
+            ++numOfFullMoves;
+        }
+
+        if (Piece.getTypeFromPiece(pieceToMove) == Piece.PAWN ||
+                Piece.getTypeFromPiece(toPiece) != Piece.NONE) {
+            numOfHalfMoves = 0;
+        } else {
+            ++numOfHalfMoves;
+        }
+
+        if (Piece.getTypeFromPiece(pieceToMove) == Piece.PAWN &&
+                Math.abs(move.fromRow - move.toRow) == 2) {
+            enPassantTargetSquare = new Square(
+                    colorMakingMove == Piece.WHITE ? move.fromRow - 1 : move.fromRow + 1,
+                    move.fromCol
+            );
+        } else {
+            enPassantTargetSquare = null;
+        }
     }
 
     private void handleEnPassant(Move move, int colorMakingMove) {
@@ -109,7 +152,7 @@ public class Board {
 
     private void handlePawnPromotion(Move move, int colorMakingMove, boolean isSimulation) {
         if (!isSimulation && move.getSpecialMove() == SpecialMove.PAWN_PROMOTION) {
-            int promotedPiece = Clock.ChessDialog.showPromotionDialog(colorMakingMove, pieceImagesRegular);
+            int promotedPiece = ChessDialog.showPromotionDialog(colorMakingMove, pieceImagesRegular);
             setPieceAt(move.toRow, move.toCol, promotedPiece);
         }
     }
@@ -202,7 +245,7 @@ public class Board {
                     continue;
                 }
 
-                GeneralValidator.calculateLegalMoves(row, col, this, legalMoves);
+                legalMoves.addAll(GeneralValidator.getLegalMoves(row, col, this));
 
                 if (!legalMoves.isEmpty()) {
                     return false;
@@ -260,6 +303,18 @@ public class Board {
 
     public boolean blackCanCastleQueenside() {
         return blackCanCastleQueenside;
+    }
+
+    public int getNumOfHalfMoves() {
+        return numOfHalfMoves;
+    }
+
+    public int getNumOfFullMoves() {
+        return numOfFullMoves;
+    }
+
+    public Square getEnPassantTargetSquare() {
+        return enPassantTargetSquare;
     }
 
 }

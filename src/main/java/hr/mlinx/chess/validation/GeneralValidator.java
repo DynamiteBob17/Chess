@@ -4,6 +4,7 @@ import hr.mlinx.chess.board.Board;
 import hr.mlinx.chess.board.Move;
 import hr.mlinx.chess.board.Piece;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class GeneralValidator {
@@ -67,9 +68,10 @@ public class GeneralValidator {
         };
     }
 
-    public static void calculateLegalMoves(int fromRow, int fromCol, Board board, Set<Move> validMoves) {
-        validMoves.addAll(calculateValidMoves(fromRow, fromCol, board));
+    public static Set<Move> getLegalMoves(int fromRow, int fromCol, Board board) {
+        Set<Move> validMoves = new HashSet<>(calculateValidMoves(fromRow, fromCol, board));
         ValidMovesFilter.filter(validMoves, board);
+        return validMoves;
     }
 
 }
