@@ -218,23 +218,23 @@ public class Board {
 
     private void playSound(Move move, int toPiece, int colorMakingMove) {
         SpecialMove specialMove = move.getSpecialMove();
+        MoveType moveType = (toPiece == Piece.NONE) ? MoveType.REGULAR : MoveType.CAPTURE;
 
         if (isMate(colorMakingMove)) {
-            soundPlayer.playMoveSound(MoveType.GAME_OVER);
+            moveType = MoveType.GAME_OVER;
         } else if (isCheck(colorMakingMove)) {
-            soundPlayer.playMoveSound(MoveType.CHECK);
-        } else if (specialMove == SpecialMove.PAWN_PROMOTION) {
-            soundPlayer.playMoveSound(MoveType.PROMOTION);
-        } else if (specialMove == SpecialMove.SHORT_CASTLE || specialMove == SpecialMove.LONG_CASTLE) {
-            soundPlayer.playMoveSound(MoveType.CASTLE);
-        } else if (specialMove == SpecialMove.EN_PASSANT) {
-            soundPlayer.playMoveSound(MoveType.CAPTURE);
-        } else if (toPiece == Piece.NONE) {
-            soundPlayer.playMoveSound(MoveType.REGULAR);
-        } else {
-            soundPlayer.playMoveSound(MoveType.CAPTURE);
+            moveType = MoveType.CHECK;
+        } else if (specialMove != null) {
+            moveType = switch (specialMove) {
+                case PAWN_PROMOTION -> MoveType.PROMOTION;
+                case SHORT_CASTLE, LONG_CASTLE -> MoveType.CASTLE;
+                case EN_PASSANT -> MoveType.CAPTURE;
+            };
         }
+
+        soundPlayer.playMoveSound(moveType);
     }
+
 
     private boolean isMate(int colorMakingMove) {
         Set<Move> legalMoves = new MoveSet<>();
